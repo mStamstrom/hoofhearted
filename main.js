@@ -1,6 +1,7 @@
 const api = require('./api');
 const helpers = require('./helpers');
 const astar = require('./astar');
+const powerup = require('./powerup');
 
 // TODO: Enter your API key
 const API_KEY = '60c4b5fa-b1bd-4ad6-a644-4e2b7fa6e91e';
@@ -10,7 +11,7 @@ const maxPlayers = 1;
 const map = 'standardmap';
 const numberOfStreams = 10;
 const numberOfElevations = 10;
-const numberOfPowerups = 10;
+const numberOfPowerups = 1000;
 
 var EndNode;
 
@@ -19,6 +20,7 @@ function play(gameState) {
 	if(gameState.gameStatus == "finished"){
 		var curX = gameState.yourPlayer.xPos;
 		var curY = gameState.yourPlayer.yPos;
+		
 		console.log("x ", curX, " y ", curY)
 		var curpos = Maparr[curY][curX];
 
@@ -39,18 +41,27 @@ function play(gameState) {
 	var currentTile = path[path.length-1];
 	var currentStamina = gameState.yourPlayer.stamina;
 	if (currentTile.type != "win") {
-		var nexttile = path[path.length-2];
-		var direction = helpers.getDirection(currentTile, nexttile);
-		var speed = helpers.calculateSpeed(path, direction, currentStamina)
-		console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
-		console.log("stamina ", gameState.yourPlayer.stamina);
-		console.log("speed", speed);
-		if(currentStamina < 20){
-			api.rest(gameState.gameId, play)
+		const {powerupInventory} = gameState.yourPlayer;
+		const powerUpToUse = powerupInventory.find(x => powerup.shouldUseItem(x));
+		if (powerUpToUse) {
+			api.usePowerup(gameState.gameId, powerUpToUse, play);
+		} else if (powerupInventory.length === 3) {
+			const powerUpToDrop = powerupInventory.find(x => !powerup.shouldUseItem(x));
+			if (powerUpToDrop)
+				api.dropPowerup(gameState.gameId, powerUpToDrop, play);
+		} else {
+			var nexttile = path[path.length-2];
+			var direction = helpers.getDirection(currentTile, nexttile);
+			var speed = helpers.calculateSpeed(path, direction, currentStamina)
+			console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
+			console.log("stamina ", gameState.yourPlayer.stamina);
+			console.log("speed", speed);
+			if(currentStamina < 20){
+				api.rest(gameState.gameId, play)
+			}
+			api.makeMove(gameState.gameId, direction, speed, play);
 		}
-		api.makeMove(gameState.gameId, direction, speed, play);
-	}
-	else{
+	}	else {
 		console.log("1 round down, many to go.")
 		api.endPreviousGamesIfAny(initGame);
 	}
