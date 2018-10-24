@@ -39,13 +39,15 @@ function play(gameState) {
 	var currentTile = path[path.length-1];
 	var currentStamina = gameState.yourPlayer.stamina;
 	if (currentTile.type != "win") {
-		// console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
-		// console.log("stamina ", gameState.yourPlayer.stamina);
-		// console.log("speed", speed);
-		
 		var nexttile = path[path.length-2];
 		var direction = helpers.getDirection(currentTile, nexttile);
 		var speed = helpers.calculateSpeed(path, direction, currentStamina)
+		console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
+		console.log("stamina ", gameState.yourPlayer.stamina);
+		console.log("speed", speed);
+		if(currentStamina < 20){
+			api.rest(gameState.gameId, play)
+		}
 		api.makeMove(gameState.gameId, direction, speed, play);
 	}
 	else{
