@@ -15,18 +15,21 @@ const numberOfPowerups = 10;
 var EndNode;
 
 function play(gameState) {
+	var Maparr = gameState.tileInfo;
 	if(gameState.gameStatus == "finished"){
 		var curX = gameState.yourPlayer.xPos;
 		var curY = gameState.yourPlayer.yPos;
+		console.log("x ", curX, " y ", curY)
 		var curpos = Maparr[curY][curX];
+
 		console.log("Game is finished please keep on winnig: ", curpos);
-		setTimeout(function(){ console.log("waited for 3 sec") }, 3000);
-		//api.endPreviousGamesIfAny(initGame);
+		setTimeout(function(){ console.log("waited for 3 sec, now going again") }, 3000);
+		api.endPreviousGamesIfAny(initGame);
 		return;
 	}
 	console.log('Starting turn ' + gameState.turn + ' status ' + gameState.gameStatus)
 	// TODO: Implement your solution
-	var Maparr = gameState.tileInfo;
+	
 	
 	var startX = gameState.yourPlayer.xPos;
 	var startY = gameState.yourPlayer.yPos;
