@@ -64,7 +64,7 @@ module.exports= {
             
         }
     },
-    costOfTile: function(tile, curentDirection, speed){
+    costOfTile: function(tile, currentDirection, speed){
         var cost = 0;
         if(tile == undefined)
             return 210;
@@ -86,10 +86,34 @@ module.exports= {
             cost += 7; // Detta är egentligen stamina så kanske borde vara högre.
 
         if(tile.elevation != undefined){
-            //do something
+            if (tile.elevation.direction === currentDirection) {
+                // same direction
+                cost - tile.elevation.amount;
+            } else if (
+                (tile.elevation.direction === 'n' && currentDirection === 's') ||
+                (tile.elevation.direction === 'e' && currentDirection === 'w') ||
+                (tile.elevation.direction === 'w' && currentDirection === 'e')) {
+                // Opposite direction
+                cost + tile.elevation.amount;
+            } else {
+                // deviation direction
+                const speedPerTile = speed/cost;
+            }
         }
+
         if(tile.waterstream != undefined){
-            //do something
+            if (tile.elevation.direction === currentDirection) {
+                // same direction
+                cost - tile.elevation.speed;
+            } else if (
+                (tile.elevation.direction === 'n' && currentDirection === 's') ||
+                (tile.elevation.direction === 'e' && currentDirection === 'w') ||
+                (tile.elevation.direction === 'w' && currentDirection === 'e')) {
+                // Opposite direction
+                cost + tile.elevation.speed;
+            } else {
+                // deviation
+            }
         }
         return cost;
     }
