@@ -113,15 +113,15 @@ module.exports= {
         }
 
         if(tile.waterstream != undefined){
-            if (tile.elevation.direction === currentDirection) {
+            if (tile.waterstream.direction === currentDirection) {
                 // same direction
-                cost - tile.elevation.speed;
+                cost - tile.waterstream.speed;
             } else if (
-                (tile.elevation.direction === 'n' && currentDirection === 's') ||
-                (tile.elevation.direction === 'e' && currentDirection === 'w') ||
-                (tile.elevation.direction === 'w' && currentDirection === 'e')) {
+                (tile.waterstream.direction === 'n' && currentDirection === 's') ||
+                (tile.waterstream.direction === 'e' && currentDirection === 'w') ||
+                (tile.waterstream.direction === 'w' && currentDirection === 'e')) {
                 // Opposite direction
-                cost + tile.elevation.speed;
+                cost + tile.waterstream.speed;
             } else {
                 // deviation
             }
