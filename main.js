@@ -15,7 +15,16 @@ const numberOfPowerups = 10;
 var EndNode;
 
 function play(gameState) {
-	console.log('Starting turn ' + gameState.turn)
+	if(gameState.gameStatus == "finished"){
+		var curX = gameState.yourPlayer.xPos;
+		var curY = gameState.yourPlayer.yPos;
+		var curpos = Maparr[curY][curX];
+		console.log("Game is finished please keep on winnig: ", curpos);
+		setTimeout(function(){ console.log("waited for 3 sec") }, 3000);
+		//api.endPreviousGamesIfAny(initGame);
+		return;
+	}
+	console.log('Starting turn ' + gameState.turn + ' status ' + gameState.gameStatus)
 	// TODO: Implement your solution
 	var Maparr = gameState.tileInfo;
 	
@@ -23,19 +32,21 @@ function play(gameState) {
 	var startY = gameState.yourPlayer.yPos;
 	var start = Maparr[startY][startX];
 	var path = astar.calc(start, startX, startY, EndNode, Maparr);
-	// Example
-	var directions = ['e', 'w', 'n', 's'];
-	var nexttile = path[path.length-2];
+
+	var currentTile = path[path.length-1];
 	var currentStamina = gameState.yourPlayer.stamina;
-	var direction = helpers.getDirection(path[path.length-1], nexttile);
-	var speed = helpers.calculateSpeed(path, direction, currentStamina)
-	if (gameState.turn < 200) {
-		console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
-		console.log("stamina ", gameState.yourPlayer.stamina);
-		console.log("speed", speed);
+	if (currentTile.type != "win") {
+		// console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
+		// console.log("stamina ", gameState.yourPlayer.stamina);
+		// console.log("speed", speed);
+		
+		var nexttile = path[path.length-2];
+		var direction = helpers.getDirection(currentTile, nexttile);
+		var speed = helpers.calculateSpeed(path, direction, currentStamina)
 		api.makeMove(gameState.gameId, direction, speed, play);
 	}
 	else{
+		console.log("1 round down, many to go.")
 		api.endPreviousGamesIfAny(initGame);
 	}
 }

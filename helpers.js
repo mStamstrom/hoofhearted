@@ -30,7 +30,12 @@ module.exports= {
         while(direction == currentDirection && !(counter > 5)){
             var previousTile = path[path.length-counter+1];
             var tempTile = path[path.length-counter];
-            direction = this.getDirection(previousTile, tempTile)
+            if(tempTile != undefined){
+                direction = this.getDirection(previousTile, tempTile)
+            }
+            else{
+                direction = "stoploop";
+            }
             counter++;
         }
         var steps = counter - 2; 
