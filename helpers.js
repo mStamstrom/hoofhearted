@@ -30,7 +30,12 @@ module.exports= {
         while(direction == currentDirection && !(counter > 5)){
             var previousTile = path[path.length-counter+1];
             var tempTile = path[path.length-counter];
-            direction = this.getDirection(previousTile, tempTile)
+            if(tempTile != undefined){
+                direction = this.getDirection(previousTile, tempTile)
+            }
+            else{
+                direction = "stoploop";
+            }
             counter++;
         }
         var steps = counter - 2; 
@@ -40,10 +45,16 @@ module.exports= {
         if(steps > 1){
             cost += this.costOfTile(path[path.length-1], currentDirection);
             for(counter; counter > 2; counter--){
-                cost += this.costOfTile(path[path.length-counter], currentDirection);
+                var pathElem = path[path.length-counter]
+                if(pathElem != undefined){
+                    cost += this.costOfTile(pathElem.tile, currentDirection);
+                }
+            }
+            if(cost <= speed.slow){
+                return "slow";
             }
             if(cost < speed.medium){
-                if(currentStamina-30 > 60){
+                if(currentStamina-30 > 50){
                     return "medium";
                 }
                 else{
@@ -51,10 +62,10 @@ module.exports= {
                 }
             }
             else{
-                if(currentStamina-50 > 50){
+                if(currentStamina-50 > 35){
                     return "fast";
                 }
-                if(currentStamina-30 > 60){
+                if(currentStamina-30 > 50){
                     return "medium";
                 }
                 else{
@@ -64,7 +75,7 @@ module.exports= {
             
         }
     },
-    costOfTile: function(tile, currentDirection, speed){
+    costOfTile: function(tile, currentDirection, speed = 1){
         var cost = 0;
         if(tile == undefined)
             return 210;
