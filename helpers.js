@@ -23,62 +23,107 @@ module.exports= {
             return 's';
         }
     },
-    calculateSpeed: function(path, currentDirection, currentStamina){
+    calculateSpeed: function(map, path, currentDirection, currentStamina){
         var direction = currentDirection;
         var cost = 0;
-        var counter = 2;
-        while(direction == currentDirection && !(counter > 5)){
-            var previousTile = path[path.length-counter+1];
-            var tempTile = path[path.length-counter];
+        var steps = 0;
+        var lastTile;
+        while(direction == currentDirection && steps < 3){
+            var previousTile = path[path.length-(steps+1)];
+            var tempTile = path[path.length-(steps+2)];
             if(tempTile != undefined){
+                lastTile = tempTile;
                 direction = this.getDirection(previousTile, tempTile)
+                if(direction == currentDirection){
+                    cost += this.costOfTile(tempTile.tile, currentDirection);
+                }
             }
             else{
                 direction = "stoploop";
             }
-            counter++;
+            steps++;
+        } 
+        var costforonemore = 1000;
+        if(lastTile != undefined){
+            var nextTileSameDir = map[this.getYChange(lastTile.y, currentDirection)][this.getXChange(lastTile.y, currentDirection)];
+            costforonemore = cost + this.costOfTile(nextTileSameDir, currentDirection, 1, false );
         }
-        var steps = counter - 2; 
         if(steps <= 1){
             return "slow"
         }
-        if(steps > 1){
-            cost += this.costOfTile(path[path.length-1], currentDirection);
-            for(counter; counter > 2; counter--){
-                var pathElem = path[path.length-counter]
-                if(pathElem != undefined){
-                    cost += this.costOfTile(pathElem.tile, currentDirection);
-                }
-            }
-            if(cost <= speed.slow){
-                return "slow";
-            }
-            if(cost < speed.medium){
-                if(currentStamina-30 > 50){
-                    return "medium";
-                }
-                else{
-                    return "slow";
-                }
+        if(steps == 2){
+            if(currentStamina-30 > 50 && cost <= speed.medium){
+                return "medium";
             }
             else{
-                if(currentStamina-50 > 35){
-                    return "fast";
-                }
-                if(currentStamina-30 > 50){
-                    return "medium";
-                }
-                else{
-                    return "slow";
-                }
+                return "slow";
             }
-            
         }
+        if(steps == 3){
+            if(currentStamina-50 > 40 && (cost <= speed.fast || costforonemore <= speed.fast)){
+                return "fast";
+            }
+            if(currentStamina-30 > 50 && cost <= speed.medium){
+                return "medium";
+            }
+            else{
+                return "slow";
+            }
+        }
+        
+        // if(steps > 1){
+        //     if(cost + this.costOfTile(nextTileSameDir, currentDirection, 1, false ) <= speed.fast){
+        //         if(currentStamina-50 > 35){
+        //             return "fast";
+        //         }
+        //         if(currentStamina-30 > 50){
+        //             return "medium";
+        //         }
+        //         else{
+        //             return "slow";
+        //         }
+        //     }
+        //     if(cost + this.costOfTile(nextTileSameDir, currentDirection, 1, false ) <= speed.medium){
+        //         if(currentStamina-30 > 50){
+        //             return "medium";
+        //         }
+        //         else{
+        //             return "slow";
+        //         }
+        //     }
+        //     else{
+        //         return "slow";
+        //     }
+            
+            
+        // }
     },
-    costOfTile: function(tile, currentDirection, speed = 1){
+    isTileAfforded: function(tile, currentDirection, movementpointsLeft){
+        var cost = this.costOfTile(tile,currentDirection, 1, true );
+        return cost < movementpointsLeft;
+    },
+    getYChange: function(y, direction){
+        if(direction == "n"){
+            return y+1;
+        }
+        if(direction == "s"){
+            return y-1;
+        }
+        return y;
+    },
+    getXChange: function(x, direction){
+        if(direction == "e"){
+            return x+1;
+        }
+        if(direction == "w"){
+            return x-1
+        }
+        return x;
+    },
+    costOfTile: function(tile, currentDirection, speed = 1, ignoreRain = false){
         var cost = 0;
         if(tile == undefined)
-            return 210;
+            return 1000;
 
         if(tile.type == "road")
             cost += 31;
@@ -93,7 +138,7 @@ module.exports= {
         else if(tile.type == "rockywater")
             cost += 1000;
         
-        if(tile.weather == "rain")
+        if(!ignoreRain && tile.weather == "rain")
             cost += 7; // Detta är egentligen stamina så kanske borde vara högre.
 
         if(tile.elevation != undefined){
@@ -113,15 +158,15 @@ module.exports= {
         }
 
         if(tile.waterstream != undefined){
-            if (tile.elevation.direction === currentDirection) {
+            if (tile.waterstream.direction === currentDirection) {
                 // same direction
-                cost - tile.elevation.speed;
+                cost - tile.waterstream.speed;
             } else if (
-                (tile.elevation.direction === 'n' && currentDirection === 's') ||
-                (tile.elevation.direction === 'e' && currentDirection === 'w') ||
-                (tile.elevation.direction === 'w' && currentDirection === 'e')) {
+                (tile.waterstream.direction === 'n' && currentDirection === 's') ||
+                (tile.waterstream.direction === 'e' && currentDirection === 'w') ||
+                (tile.waterstream.direction === 'w' && currentDirection === 'e')) {
                 // Opposite direction
-                cost + tile.elevation.speed;
+                cost + tile.waterstream.speed;
             } else {
                 // deviation
             }
