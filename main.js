@@ -35,7 +35,10 @@ function play(gameState) {
 	var startY = gameState.yourPlayer.yPos;
 	var start = Maparr[startY][startX];
 	var path = astar.calc(start, startX, startY, EndNode, Maparr);
-
+	var activePowerups = [];
+	gameState.yourPlayer.activePowerups.forEach(item => {
+		activePowerups.push(item.name);
+	});
 	var currentTile = path[path.length-1];
 	var currentStamina = gameState.yourPlayer.stamina;
 	if (currentTile.type != "win") {
@@ -50,7 +53,7 @@ function play(gameState) {
 		} else {
 			var nexttile = path[path.length-2];
 			var direction = helpers.getDirection(currentTile, nexttile);
-			var speed = helpers.calculateSpeed(Maparr, path, direction, currentStamina, gameState.yourPlayer.activePowerups)
+			var speed = helpers.calculateSpeed(Maparr, path, direction, currentStamina, activePowerups)
 			console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
 			console.log("stamina ", gameState.yourPlayer.stamina);
 			console.log("speed", speed);
