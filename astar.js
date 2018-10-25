@@ -94,6 +94,6 @@ module.exports = {
         return dic;
     },
     g: function(node){
-        return helpers.costOfTile(node.tile, "e")
+        return helpers.costOfTile(node.tile, "e") + helpers.weightsForDeviation(node.tile);
     }
 }

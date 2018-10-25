@@ -1,6 +1,7 @@
 const api = require('./api');
 const helpers = require('./helpers');
 const astar = require('./astar');
+const powerup = require('./powerup');
 
 // TODO: Enter your API key
 const API_KEY = '60c4b5fa-b1bd-4ad6-a644-4e2b7fa6e91e';
@@ -19,16 +20,15 @@ function play(gameState) {
 	if(gameState.gameStatus == "finished"){
 		var curX = gameState.yourPlayer.xPos;
 		var curY = gameState.yourPlayer.yPos;
+		
 		console.log("x ", curX, " y ", curY)
 		var curpos = Maparr[curY][curX];
 
 		console.log("Game is finished please keep on winnig: ", curpos);
 		setTimeout(function(){ console.log("waited for 3 sec, now going again") }, 3000);
-		api.endPreviousGamesIfAny(initGame);
 		return;
 	}
 	console.log('Starting turn ' + gameState.turn + ' status ' + gameState.gameStatus)
-	// TODO: Implement your solution
 	
 	
 	var startX = gameState.yourPlayer.xPos;
@@ -39,25 +39,36 @@ function play(gameState) {
 	var currentTile = path[path.length-1];
 	var currentStamina = gameState.yourPlayer.stamina;
 	if (currentTile.type != "win") {
-		var nexttile = path[path.length-2];
-		var direction = helpers.getDirection(currentTile, nexttile);
-		var speed = helpers.calculateSpeed(Maparr, path, direction, currentStamina)
-		console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
-		console.log("stamina ", gameState.yourPlayer.stamina);
-		console.log("speed", speed);
-		if(currentStamina < 20){
-			api.rest(gameState.gameId, play);
-		}
-		else{
-			if(speed != "step"){
-				api.makeMove(gameState.gameId, direction, speed, play);
+		const {powerupInventory} = gameState.yourPlayer;
+		const powerUpToUse = powerupInventory.find(x => powerup.shouldUseItem(x));
+		if (powerUpToUse) {
+			api.usePowerup(gameState.gameId, powerUpToUse, play);
+		} else if (powerupInventory.length === 3) {
+			const powerUpToDrop = powerupInventory.find(x => !powerup.shouldUseItem(x));
+			if (powerUpToDrop)
+				api.dropPowerup(gameState.gameId, powerUpToDrop, play);
+		} else {
+			var nexttile = path[path.length-2];
+			var direction = helpers.getDirection(currentTile, nexttile);
+			var speed = helpers.calculateSpeed(Maparr, path, direction, currentStamina)
+			console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
+			console.log("stamina ", gameState.yourPlayer.stamina);
+			console.log("speed", speed);
+			if(currentStamina < 20){
+				api.rest(gameState.gameId, play);
 			}
 			else{
-				api.step(gameState.gameId, direction, play);
+				if(speed != "step"){
+					api.makeMove(gameState.gameId, direction, speed, play);
+				}
+				else{
+					api.step(gameState.gameId, direction, play);
+				}
 			}
 		}
 	}
 	else{
+
 		console.log("1 round down, many to go.")
 		api.endPreviousGamesIfAny(initGame);
 	}
