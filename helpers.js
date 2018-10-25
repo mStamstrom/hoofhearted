@@ -62,7 +62,7 @@ module.exports= {
             return "slow";
         }
         devCost = this.costOfDeviation(steps, "medium", currentDirection)
-        if(cost + devCost <= speed.medium || ((currentStamina - 50) <= 50 || this.findOne(activePowerups, ["Energyboost","StaminaSale"]))){
+        if(cost + devCost <= speed.medium || ((currentStamina - 50) <= 50 && !this.findOne(activePowerups, ["Energyboost","StaminaSale"]))){
             if(!canGoOneMore && cost + devCost + 20 <= speed.medium){
                 return "slow";
             }
@@ -70,7 +70,7 @@ module.exports= {
         }
         else{
             devCost = this.costOfDeviation(steps, "fast", currentDirection)
-            if(!canGoOneMore && cost + devCost + 20 <= speed.fast){
+            if((!canGoOneMore && cost + devCost + 20 <= speed.fast)){
                 return "medium"
             }
             return "fast";
