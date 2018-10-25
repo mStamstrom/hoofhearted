@@ -20,7 +20,6 @@ function play(gameState) {
 	if(gameState.gameStatus == "finished"){
 		var curX = gameState.yourPlayer.xPos;
 		var curY = gameState.yourPlayer.yPos;
-		
 		console.log("x ", curX, " y ", curY)
 		var curpos = Maparr[curY][curX];
 
@@ -43,13 +42,18 @@ function play(gameState) {
 	var currentStamina = gameState.yourPlayer.stamina;
 	if (currentTile.type != "win") {
 		const {powerupInventory} = gameState.yourPlayer;
-		const powerUpToUse = powerupInventory.find(x => powerup.shouldUseItem(x));
+		const powerUpToUse = powerupInventory.find(x => powerup.shouldUseItem(x, currentTile));
 		if (powerUpToUse) {
 			api.usePowerup(gameState.gameId, powerUpToUse, play);
 		} else if (powerupInventory.length === 3) {
-			const powerUpToDrop = powerupInventory.find(x => !powerup.shouldUseItem(x));
-			if (powerUpToDrop)
-				api.dropPowerup(gameState.gameId, powerUpToDrop, play);
+			const powerUpToUse = powerupInventory.find(x => powerup.shouldUseItemAll(x));
+			if (powerUpToUse) {
+				api.usePowerup(gameState.gameId, powerUpToUse, play);
+			} else {
+				const powerUpToDrop = powerupInventory.find(x => !powerup.shouldUseItemAll(x));
+				if (powerUpToDrop)
+					api.dropPowerup(gameState.gameId, powerUpToDrop, play);
+			}
 		} else {
 			var nexttile = path[path.length-2];
 			var direction = helpers.getDirection(currentTile, nexttile);
