@@ -166,7 +166,7 @@ module.exports= {
     },
     weightsForDeviation: function(tile){
         if(tile.elevation != undefined || tile.waterstream != undefined)
-            return 5;
+            return 0;
         return 0;
     },
     findOne: function (haystack, arr) {

@@ -85,7 +85,6 @@ module.exports = {
     },
     f: function(node){
         return this.h(node, endNode) + this.g(node);
-
     },
     h: function(node, end){
         var xDic = Math.abs(node.x - end.x);
@@ -94,6 +93,6 @@ module.exports = {
         return dic;
     },
     g: function(node){
-        return helpers.costOfTile(node.tile, "e") + helpers.weightsForDeviation(node.tile);
+        return helpers.costOfTile(node.tile, false) + helpers.weightsForDeviation(node.tile);
     }
 }
