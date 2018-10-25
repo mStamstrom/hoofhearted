@@ -50,7 +50,7 @@ function play(gameState) {
 		} else {
 			var nexttile = path[path.length-2];
 			var direction = helpers.getDirection(currentTile, nexttile);
-			var speed = helpers.calculateSpeed(Maparr, path, direction, currentStamina)
+			var speed = helpers.calculateSpeed(Maparr, path, direction, currentStamina, gameState.yourPlayer.activePowerups)
 			console.log("current position: x: ", gameState.yourPlayer.xPos, "y: ", gameState.yourPlayer.yPos)
 			console.log("stamina ", gameState.yourPlayer.stamina);
 			console.log("speed", speed);

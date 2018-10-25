@@ -23,7 +23,7 @@ module.exports= {
             return 's';
         }
     },
-    calculateSpeed: function(map, path, currentDirection, currentStamina){
+    calculateSpeed: function(map, path, currentDirection, currentStamina, activePowerups){
         var direction = currentDirection;
         var cost = 0;
         var nrsteps = 0;
@@ -49,25 +49,27 @@ module.exports= {
         if(lastTile != undefined){
             var nextTileSameDir = map[this.getYChange(lastTile.y, currentDirection)][this.getXChange(lastTile.y, currentDirection)];
             if(nextTileSameDir != undefined && nextTileSameDir.type == "forest" || nextTileSameDir == "rockywater"){
-                canGoOneMore = false;
+                if(!this.findOne(activePowerups, ["Helmet"])){
+                    canGoOneMore = false;
+                }
             }
         }
-        var devCost = + this.costOfDeviation(steps, "slow", currentDirection)
-        if(cost + devCost <= speed.slow || (currentStamina - 30) <= 45){
-            if(cost + devCost + 20 <= speed.slow){
+        var devCost = this.costOfDeviation(steps, "slow", currentDirection)
+        if(cost + devCost <= speed.slow || (currentStamina - 30) <= 40){
+            if(!canGoOneMore && cost + devCost + 20 <= speed.slow){
                 return "step";
             }
             return "slow";
         }
-        devCost = + this.costOfDeviation(steps, "medium", currentDirection)
-        if(cost + devCost <= speed.medium || (currentStamina - 50) <= 45 ){
+        devCost = this.costOfDeviation(steps, "medium", currentDirection)
+        if(cost + devCost <= speed.medium || ((currentStamina - 50) <= 50 || this.findOne(activePowerups, ["Energyboost","StaminaSale"]))){
             if(!canGoOneMore && cost + devCost + 20 <= speed.medium){
                 return "slow";
             }
             return "medium";
         }
         else{
-            devCost = + this.costOfDeviation(steps, "medium", currentDirection)
+            devCost = this.costOfDeviation(steps, "fast", currentDirection)
             if(!canGoOneMore && cost + devCost + 20 <= speed.fast){
                 return "medium"
             }
@@ -166,5 +168,10 @@ module.exports= {
         if(tile.elevation != undefined || tile.waterstream != undefined)
             return 5;
         return 0;
+    },
+    findOne: function (haystack, arr) {
+        return arr.some(function (v) {
+            return haystack.indexOf(v) >= 0;
+        });
     }
 }
