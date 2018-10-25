@@ -46,9 +46,16 @@ function play(gameState) {
 		console.log("stamina ", gameState.yourPlayer.stamina);
 		console.log("speed", speed);
 		if(currentStamina < 20){
-			api.rest(gameState.gameId, play)
+			api.rest(gameState.gameId, play);
 		}
-		api.makeMove(gameState.gameId, direction, speed, play);
+		else{
+			if(speed != "step"){
+				api.makeMove(gameState.gameId, direction, speed, play);
+			}
+			else{
+				api.step(gameState.gameId, direction, play);
+			}
+		}
 	}
 	else{
 		console.log("1 round down, many to go.")

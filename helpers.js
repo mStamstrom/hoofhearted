@@ -28,7 +28,7 @@ module.exports= {
         var cost = 0;
         var steps = 0;
         var lastTile;
-        while(direction == currentDirection && steps < 3){
+        while(direction == currentDirection){
             var previousTile = path[path.length-(steps+1)];
             var tempTile = path[path.length-(steps+2)];
             if(tempTile != undefined){
@@ -43,33 +43,33 @@ module.exports= {
             }
             steps++;
         } 
-        var costforonemore = 1000;
+        var canGoOneMore = true;
         if(lastTile != undefined){
             var nextTileSameDir = map[this.getYChange(lastTile.y, currentDirection)][this.getXChange(lastTile.y, currentDirection)];
-            costforonemore = cost + this.costOfTile(nextTileSameDir, currentDirection, 1, false );
-        }
-        if(steps <= 1){
-            return "slow"
-        }
-        if(steps == 2){
-            if(currentStamina-30 > 50 && cost <= speed.medium){
-                return "medium";
+            if(nextTileSameDir != undefined && nextTileSameDir.type == "forest" || nextTileSameDir == "rockywater"){
+                canGoOneMore = false;
             }
-            else{
+        }
+
+        if(cost <= speed.slow || (currentStamina - 30) <= 45){
+            if(!canGoOneMore && cost + 20 <= speed.slow){
+                return "step";
+            }
+            return "slow";
+        }
+        if(cost <= speed.medium || (currentStamina - 50) <= 45 ){
+            if(!canGoOneMore && cost + 20 <= speed.medium){
                 return "slow";
             }
+            return "medium";
         }
-        if(steps == 3){
-            if(currentStamina-50 > 40 && (cost <= speed.fast || costforonemore <= speed.fast)){
-                return "fast";
+        else{
+            if(!canGoOneMore && cost + 20 <= speed.fast){
+                return "medium"
             }
-            if(currentStamina-30 > 50 && cost <= speed.medium){
-                return "medium";
-            }
-            else{
-                return "slow";
-            }
+            return "fast";
         }
+        
         
         // if(steps > 1){
         //     if(cost + this.costOfTile(nextTileSameDir, currentDirection, 1, false ) <= speed.fast){
